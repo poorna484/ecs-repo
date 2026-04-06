@@ -11,7 +11,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/poorna484/ecs-repo.git'
             }
@@ -26,7 +26,7 @@ pipeline {
         stage('Login to ECR') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'aws-creds',
+                    credentialsId: 'aws-cred',   // ✅ UPDATED HERE
                     usernameVariable: 'AWS_ACCESS_KEY_ID',
                     passwordVariable: 'AWS_SECRET_ACCESS_KEY'
                 )]) {
@@ -44,10 +44,19 @@ pipeline {
             }
         }
 
-        stage('Push Image') {
+        stage('Push Image to ECR') {
             steps {
                 sh 'docker push $ECR_URI:latest'
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Image pushed to ECR successfully"
+        }
+        failure {
+            echo "❌ Pipeline failed"
         }
     }
 }
